@@ -6,7 +6,7 @@ SRC_DIR=src
 BIN_DIR=bin
 OBJ_DIR=obj
 
-libs: $(LIB_DIR)/libarray_list.a $(LIB_DIR)/libfon.a
+libs: $(LIB_DIR)/libarray_list.a $(LIB_DIR)/libfon.a $(LIB_DIR)/libflash.a
 exec:	$(BIN_DIR)/client $(BIN_DIR)/server
 all: libs exec
 
@@ -18,6 +18,10 @@ $(LIB_DIR)/libarray_list.a: $(OBJ_DIR)/array_list.o
 $(LIB_DIR)/libfon.a: $(OBJ_DIR)/fon.o
 	rm -f $(LIB_DIR)/libfon.a
 	ar -r $(LIB_DIR)/libfon.a $(OBJ_DIR)/fon.o
+
+$(LIB_DIR)/libflash.a: $(OBJ_DIR)/flash.o
+	rm -f $(LIB_DIR)/libflash.a
+	ar -r $(LIB_DIR)/libflash.a $(OBJ_DIR)/flash.o
 
 #Make objects
 $(OBJ_DIR)/client.o: $(SRC_DIR)/client.c
@@ -35,6 +39,10 @@ $(OBJ_DIR)/fon.o: $(LIB_DIR)/fon.h $(LIB_DIR)/fon.c
 $(OBJ_DIR)/array_list.o: $(LIB_DIR)/array_list.h $(LIB_DIR)/array_list.c
 	$(CC) -c $(LIB_DIR)/array_list.c $(CFLAGS)
 	mv array_list.o $(OBJ_DIR)
+
+$(OBJ_DIR)/flash.o: $(LIB_DIR)/flash.h $(LIB_DIR)/flash.c
+	$(CC) -c $(LIB_DIR)/flash.c $(CFLAGS)
+	mv flash.o $(OBJ_DIR)
 
 #Make tests
 $(BIN_DIR)/client: $(OBJ_DIR)/client.o $(LIB_DIR)/libfon.a
