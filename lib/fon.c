@@ -196,7 +196,7 @@ void h_bind(int num_soc, struct sockaddr_in *p_adr_socket)
 /* ENTREE									*/
 /*		num_soc	: 	Numero identifiant la socket			*/
 /*										*/
-																						/*		p_adr_serv :	adresses socket d'acces au service		*//*                                                                              */
+																																										    /*              p_adr_serv :    adresses socket d'acces au service              *//*                                                                              */
 /* SORTIE									*/
 /*	     	aucune ( le rapport d'execution est envoye sur la console )	*/
 /********************************************************************************/
@@ -435,8 +435,9 @@ int h_writes(int num_soc, char *tampon, int nb_octets)
 /*	SORTIE	Nombre d'octets effectivement emis 				*/
 /*	     	( le rapport d'execution est envoye sur la console )		*/
 /********************************************************************************/
-int h_sendto(int num_soc, char *tampon, int nb_octets,
-	     struct sockaddr_in *p_adr_distant)
+int
+h_sendto(int num_soc, char *tampon, int nb_octets,
+	 struct sockaddr_in *p_adr_distant)
 {
 	int res;		/* Entier resultat de l'operation       */
 
@@ -474,8 +475,9 @@ int h_sendto(int num_soc, char *tampon, int nb_octets,
 /*	SORTIE	Nombre d'octets effectivement recus 				*/
 /*	     	( le rapport d'execution est envoye sur la console )		*/
 /********************************************************************************/
-int h_recvfrom(int num_soc, char *tampon, int nb_octets,
-	       struct sockaddr_in *p_adr_distant)
+int
+h_recvfrom(int num_soc, char *tampon, int nb_octets,
+	   struct sockaddr_in *p_adr_distant)
 {
 	int res;		/* Entier resultat de l'operation       */
 	int taille;
@@ -608,8 +610,9 @@ par adr_serv */
 /*	     	 ( le rapport d'execution est envoye sur la console )	*/
 /********************************************************************************/
 
-void adr_socket(char *service, char *nom, int typesock,
-		struct sockaddr_in **p_adr_serv)
+void
+adr_socket(char *service, char *nom, int typesock,
+	   struct sockaddr_in **p_adr_serv)
 {
 	struct addrinfo hints;	/* info à passer a getaddrinfo */
 	struct addrinfo *res;	/* permet de recuperer les adresses a l aide de getaddrinfo */

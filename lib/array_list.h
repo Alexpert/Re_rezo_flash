@@ -13,24 +13,21 @@ typedef struct {
 	* Initialize a new array_list
 	* @return Newly created array_list
 	*/
-array_list_t *
-init_array_list(void);
+array_list_t *init_array_list(void);
 
 /**
 	* Free the list
 	* @param array_list Array_list to destroy
 	* @return void
 	*/
-void
-deinit_array_list(array_list_t *array_list);
+void deinit_array_list(array_list_t * array_list);
 
 /**
 	* Prints the list
 	* @param array_list Array_list to print
 	* @return void
 	*/
-void
-print_array_list(array_list_t *array_list);
+void print_array_list(array_list_t * array_list);
 
 /**
 	* Increases the capacity of this ArrayList instance, if necessary, to ensure
@@ -39,8 +36,7 @@ print_array_list(array_list_t *array_list);
 	* @param size Minimum size to be hold by the list
 	* @return void
 	*/
-void
-ensure_capacity(array_list_t *array_list, unsigned int size);
+void ensure_capacity(array_list_t * array_list, unsigned int size);
 
 /**
 	* Appends element to the end of the list
@@ -48,8 +44,7 @@ ensure_capacity(array_list_t *array_list, unsigned int size);
 	* @param element Element added to the array_list
 	* @return void
 	*/
-void
-add_element(array_list_t *array_list, element_t *element);
+void add_element(array_list_t * array_list, element_t * element);
 
 /**
 	* Inserts element to a specified index of the list
@@ -59,7 +54,7 @@ add_element(array_list_t *array_list, element_t *element);
 	* @return void
 	*/
 void
-insert_at(array_list_t *array_list, unsigned int index, element_t *element);
+insert_at(array_list_t * array_list, unsigned int index, element_t * element);
 
 /**
 	* Get an element from a specied index
@@ -68,8 +63,7 @@ insert_at(array_list_t *array_list, unsigned int index, element_t *element);
 	* @return Element stored at index,
 	*					NULL if not found
 	*/
-element_t *
-get(array_list_t *array_list, unsigned int index);
+element_t *get(array_list_t * array_list, unsigned int index);
 
 /**
 	* Removes the element at the specified position in this list. Shifts any
@@ -79,8 +73,7 @@ get(array_list_t *array_list, unsigned int index);
 	* @return the element that was removed from the list,
 	*					NULL if not found
 	*/
-element_t *
-remove_at(array_list_t *array_list, unsigned int index);
+element_t *remove_at(array_list_t * array_list, unsigned int index);
 
 /**
 	* Removes the element in this list. Shifts any
@@ -90,7 +83,6 @@ remove_at(array_list_t *array_list, unsigned int index);
 	* @return the element that was removed from the list,
 	*					NULL if not found
 	*/
-element_t *
-remove_element(array_list_t *array_list, element_t *element);
+element_t *remove_element(array_list_t * array_list, element_t * element);
 
 #endif

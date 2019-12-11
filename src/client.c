@@ -15,20 +15,20 @@ void client_appli(char *serveur, char *service)
 {
 	printf("%s: %s\n", serveur, service);
 
-
 	struct sockaddr_in *p_adr_client;
 	int numsockclient = h_socket(AF_INET, SOCK_STREAM);
 	adr_socket(SERVICE_DEFAUT, NULL, SOCK_STREAM, &p_adr_client);
 
 	h_connect(numsockclient, p_adr_client);
-  char *str_recv = malloc(sizeof(char) * 5);
+	char *str_recv = malloc(sizeof(char) * 5);
 
 	do {
 		h_reads(numsockclient, str_recv, 5);	// On récupère la saisie du client
-    printf("%s\n", str_recv);
-    sleep(1);
-  	h_writes(numsockclient, "pong", 5);	//On envoi le mot à trouver (avec les tirets)
-	} while (1);
+		printf("%s\n", str_recv);
+		sleep(1);
+		h_writes(numsockclient, "pong", 5);	//On envoi le mot à trouver (avec les tirets)
+	}
+	while (1);
 }
 
 int main(int argc, char *argv[])

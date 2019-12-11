@@ -3,9 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-
-array_list_t *
-init_array_list(void) {
+array_list_t *init_array_list(void)
+{
 	array_list_t *array_list = malloc(sizeof(array_list_t));
 	array_list->data = malloc(sizeof(element_t *));
 	array_list->current_index = 0;
@@ -14,17 +13,16 @@ init_array_list(void) {
 	return array_list;
 }
 
-
-void
-deinit_array_list(array_list_t *array_list) {
+void deinit_array_list(array_list_t * array_list)
+{
 	free(array_list->data);
 	free(array_list);
 
 	return;
 }
 
-void
-print_array_list(array_list_t *array_list) {
+void print_array_list(array_list_t * array_list)
+{
 	if (array_list->current_index == 0) {
 		printf("[]\n");
 
@@ -35,13 +33,13 @@ print_array_list(array_list_t *array_list) {
 	for (int i = 0; i < array_list->current_index - 1; i++)
 		printf("%p, ", array_list->data[i]);
 
-	printf("%p]\n",array_list->data[array_list->current_index - 1]);
+	printf("%p]\n", array_list->data[array_list->current_index - 1]);
 
 	return;
 }
 
-void
-ensure_capacity(array_list_t *array_list, unsigned int size) {
+void ensure_capacity(array_list_t * array_list, unsigned int size)
+{
 	unsigned int new_max = array_list->max_size;
 
 	while (new_max <= size) {
@@ -49,15 +47,16 @@ ensure_capacity(array_list_t *array_list, unsigned int size) {
 	}
 
 	if (new_max != array_list->max_size) {
-		array_list->data = realloc(array_list->data, new_max * sizeof(element_t *));
+		array_list->data =
+		    realloc(array_list->data, new_max * sizeof(element_t *));
 		array_list->max_size = new_max;
 	}
 
 	return;
 }
 
-void
-add_element(array_list_t *array_list, element_t *element) {
+void add_element(array_list_t * array_list, element_t * element)
+{
 	ensure_capacity(array_list, array_list->current_index);
 
 	array_list->data[array_list->current_index++] = element;
@@ -65,9 +64,9 @@ add_element(array_list_t *array_list, element_t *element) {
 	return;
 }
 
-
 void
-insert_at(array_list_t *array_list, unsigned int index, element_t *element) {
+insert_at(array_list_t * array_list, unsigned int index, element_t * element)
+{
 	int i;
 	if (index > array_list->current_index) {
 		ensure_capacity(array_list, index);
@@ -87,19 +86,18 @@ insert_at(array_list_t *array_list, unsigned int index, element_t *element) {
 	return;
 }
 
-int
-range_check(array_list_t *array_list, unsigned int index) {
+int range_check(array_list_t * array_list, unsigned int index)
+{
 	return index < array_list->current_index;
 }
 
-element_t *
-get(array_list_t *array_list, unsigned int index) {
+element_t *get(array_list_t * array_list, unsigned int index)
+{
 	return range_check(array_list, index) ? array_list->data[index] : NULL;
 }
 
-
-element_t *
-remove_at(array_list_t *array_list, unsigned int index) {
+element_t *remove_at(array_list_t * array_list, unsigned int index)
+{
 	unsigned int i = index;
 	element_t *element = NULL;
 
@@ -115,9 +113,8 @@ remove_at(array_list_t *array_list, unsigned int index) {
 	return element;
 }
 
-
-element_t *
-remove_element(array_list_t *array_list, element_t *element) {
+element_t *remove_element(array_list_t * array_list, element_t * element)
+{
 	unsigned int i = 0;
 
 	while (array_list->data[i] != element) {
