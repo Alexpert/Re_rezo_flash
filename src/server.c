@@ -27,14 +27,33 @@ void serveur_appli(char *service)
 	h_listen(numsockserveur, 1);
 
 	int numsockclient = h_accept(numsockserveur, p_adr_serv);
+	h_writes(numsockclient, "ping", 5);
   char *str_recv = malloc(sizeof(char) * 5);
 
-	do {
-		h_writes(numsockclient, "ping", 5);	//On envoi le mot à trouver (avec les tirets)
-		h_reads(numsockclient, str_recv, 5);	// On récupère la saisie du client
-    printf("%s\n", str_recv);
-    sleep(1);
-	} while (1);
+	fd_set rdfs;
+
+	while(1) {
+		FD_ZERO(&rdfs);
+		FD_SET(numsockclient, &rdfs);
+
+	  if((select(numsockclient + 1, &rdfs, NULL, NULL, NULL)) < 0) {
+			perror("select()");
+	    exit(errno);
+	  }
+
+		if (FD_ISSET(numsockclient, &rdfs)) {
+			h_reads(numsockclient, str_recv, 5);
+			printf("%s\n", str_recv);
+			h_writes(numsockclient, "ping", 5);
+	    sleep(1);
+		}
+	}
+
+	// do {
+	// 	h_writes(numsockclient, "ping", 5);	//On envoi le mot à trouver (avec les tirets)
+	// 	h_reads(numsockclient, str_recv, 5);	// On récupère la saisie du client
+  //   printf("%s\n", str_recv);
+	// } while (1);
 }
 
 int main(int argc, char *argv[])
