@@ -21,7 +21,7 @@ struct server_instance {
 	int max_socket;
 };
 
-struct server_instance *create_instance(int socket, struct sockaddr_in *p_adr_serv) {
+struct server_instance *create_instance(int socket,  struct sockaddr_in *p_adr_serv) {
 	struct server_instance *instance = malloc(sizeof(struct server_instance));
 	instance->p_adr_serv = p_adr_serv;
 	instance->socket = socket;
@@ -47,6 +47,13 @@ void remove_client(struct server_instance *instance, int socket) {
 		for (int i = 0; i < instance->clients->current_index; ++i)
 			max = max > (int) get(instance->clients, i) ? max : (int) get(instance->clients, i);
 	}
+}
+
+void respond_client(struct server_instance *instance, int socket, char *str_recv, int ret) {
+	printf("%s\n", str_recv);
+	char *buff = malloc(sizeof(char) * 5);
+	sprintf(buff, "%d", socket);
+	h_writes(get(instance->clients, socket), buff, 5);
 }
 
 void serveur_appli(char *service)
@@ -88,10 +95,7 @@ void serveur_appli(char *service)
 				if (FD_ISSET((int) get(instance->clients, i), &rdfs)) {
 					int ret = h_reads(get(instance->clients, i), str_recv, 5);
 					if (ret > 0) {
-						printf("%s\n", str_recv);
-						char *buff = malloc(sizeof(char) * 5);
-						sprintf(buff, "%d", i);
-						h_writes(get(instance->clients, i), buff, 5);
+						respond_client(instance, i, str_recv, ret);
 					} else {
 						remove_client(instance, (int) get(instance->clients, i));
 					}
