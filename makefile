@@ -25,7 +25,7 @@ $(LIB_DIR)/libflash.a: $(OBJ_DIR)/flash.o
 
 #Make objects
 $(OBJ_DIR)/client.o: $(SRC_DIR)/client.c
-	$(CC) -c $(SRC_DIR)/client.c
+	$(CC) $(CFLAGS) -c $(SRC_DIR)/client.c
 	mv client.o $(OBJ_DIR)/client.o
 
 $(OBJ_DIR)/dummy_client.o: $(SRC_DIR)/dummy_client.c
@@ -50,7 +50,7 @@ $(OBJ_DIR)/flash.o: $(LIB_DIR)/flash.h $(LIB_DIR)/flash.c
 
 #Make tests
 $(BIN_DIR)/client: $(OBJ_DIR)/client.o $(LIB_DIR)/libfon.a
-	$(CC) -o $(BIN_DIR)/client $(OBJ_DIR)/client.o -L. $(LIB_DIR)/libfon.a -L. $(LIB_DIR)/libarray_list.a -lm
+	$(CC) $(CFLAGS) -o $(BIN_DIR)/client $(OBJ_DIR)/client.o -L. $(LIB_DIR)/libfon.a -L. $(LIB_DIR)/libarray_list.a -lm
 
 $(BIN_DIR)/dummy_client: $(OBJ_DIR)/dummy_client.o $(LIB_DIR)/libfon.a
 	$(CC) -o $(BIN_DIR)/dummy_client $(OBJ_DIR)/dummy_client.o -L. $(LIB_DIR)/libfon.a -lm
