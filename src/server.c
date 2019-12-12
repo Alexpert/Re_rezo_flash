@@ -68,28 +68,35 @@ void remove_client(struct server_instance *instance, int socket)
 }
 
 void send_post_to(Post *p, User *dest, Flash_Instance *f) {
+	printf("sending %s to %s\n", p->content, dest->login);
+	printf("socket: %d\n", dest->socket);
 
 	if (dest->socket > 0) {
-		Message msg;
-		sprintf(msg.login, "%*s", 2, "4");
-		sprintf(msg.login, "%*s", 6, getUser_from_id(p->author_id, f)->login);
-		sprintf(msg.arg, "%*s", 20, p->content);
-		h_writes(dest->socket, (char *) (&msg), sizeof(Message));
-		remove_element(p->readers, (void *) dest->id);
-		if (p->readers->current_index == 0)
+		Message *msg = malloc(sizeof(Message));
+		sprintf(msg->login, "%*s", 2, "4");
+		sprintf(msg->login, "%*s", 6, getUser_from_id(p->author_id, f)->login);
+		sprintf(msg->arg, "%*s", 20, p->content);
+		h_writes(dest->socket, (char *) (msg), sizeof(Message));
+		printf("qrugbemifubdvlujvbqldfbslrf;\n");
+		remove_element(p->readers, (void *) dest);
+		if (p->readers->current_index == 0) {
+			printf("qrugbemifubdvlujvbqldfbslrf;\n");
 			remove_element(f->posts, p);
-			//destruct_post(p);
+		}
+			// destruct_post(p);
 	}
 }
 
 void send_post(Post *p, Flash_Instance *f) {
+	printf("%d\n", p->readers->current_index);
 	for (int i = 0; i < p->readers->current_index; ++i) {
+		printf("%s\n", ((User *)get(p->readers, i))->login);
 		send_post_to(p, (User *)get(p->readers, i), f);
 	}
 }
 
 void update_msg(int socket, char *login, Flash_Instance *f) {
-	User *user =getUser_from_login(login, f);
+	User *user = getUser_from_login(login, f);
 	for (int i = 0; i < f->posts->current_index; ++i) {
 		Post *p = get(f->posts, i);
 		int j = 0;
@@ -168,12 +175,17 @@ respond_client(int socket, char *str_recv, struct server_instance *s)
 			}
 			break;
 		case '4':
-			if(p = publish(msg->login, msg->arg, f)) {
+			printf("publishing\n");
+			p = publish(msg->login, msg->arg, f);
+			if(p != NULL) {
 				strcpy(res->cmd_id, "1");
+				printf("publish 1\n");
+				send_post(p, f);
+				printf("sent\n");
 			} else {
 				strcpy(res->cmd_id, "2");
+				printf("publish 2\n");
 			}
-			send_post(p, f);
 			break;
 		case '5':
 			send_list(list_sub(msg->login, f), socket);

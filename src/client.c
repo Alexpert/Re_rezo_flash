@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 
 #include "../lib/fon.h"
 
@@ -47,7 +48,7 @@ void client_appli(char *serveur, char *service)
 	int numsockclient = h_socket(AF_INET, SOCK_STREAM);
 	adr_socket(SERVICE_DEFAUT, NULL, SOCK_STREAM, &p_adr_client);
 	char *str_recv = malloc(sizeof(char) * SIZE_RECV);
-	char *pseudo;
+	char *psd = NULL;
 
 	//Connexion
 	h_connect(numsockclient, p_adr_client);
@@ -55,13 +56,12 @@ void client_appli(char *serveur, char *service)
 	//Login
 	printf("Bonjour et bienvenue sur FlashTweet !\n");
 	printf("Veuillez saisir votre nom d'utilisateur : \n");
-	//CLEAR_STDIN;
-	getline(&pseudo, &login_size, stdin);
-	// pseudo[6] = '\0';
+	getline(&psd, &login_size, stdin);
+	psd[6] = '\0';
 
 	Message *msg = malloc(sizeof(Message));
 	strcpy(msg->cmd_id, "1");
-	strcpy(msg->login, pseudo);
+	strcpy(msg->login, psd);
 	memcpy((void *)str_recv, (void *)msg, sizeof(Message));
 	h_writes(numsockclient, str_recv, SIZE_RECV);
 	h_reads(numsockclient, str_recv, SIZE_RECV);
@@ -76,8 +76,9 @@ void client_appli(char *serveur, char *service)
 	}
 	printf("Pour afficher l'aide avec les commandes que vous pouvez effectuer, tapez h\n");
 	char cmd;
-	char *args;
-	char *login;
+	char *args = NULL;
+	char *login = NULL;
+	size_t arg_size = 21;
 	int nb;
 	do
 	{
@@ -94,36 +95,39 @@ void client_appli(char *serveur, char *service)
 		// 		display_msg(msg);
 		// 	}
 		// }
-		printf("%s >", pseudo);
-		cmd = getc(stdin);
+		// printf("%s>", psd);
+		// cmd = getc(stdin);
 		switch (cmd)
 		{
 		case 's':
 			printf("A qui souhaitez-vous vous abonner ? : \n");
 			CLEAR_STDIN;
 			getline(&login, &login_size, stdin);
+			login[6] = '\0';
 			strcpy(msg->cmd_id, "2");
-			strcpy(msg->login, pseudo);
+			strcpy(msg->login, psd);
 			strcpy(msg->arg, login);
 			break;
 		case 'u':
 			printf("De qui souhaitez-vous vous désabonner ? : \n");
 			CLEAR_STDIN;
 			getline(&login, &login_size, stdin);
+			login[6] = '\0';
 			strcpy(msg->cmd_id, "3");
-			strcpy(msg->login, pseudo);
+			strcpy(msg->login, psd);
 			strcpy(msg->arg, login);
 			break;
 		case 'l':
 			strcpy(msg->cmd_id, "5");
-			strcpy(msg->login, pseudo);
+			strcpy(msg->login, psd);
 			break;
 		case 'p':
 			printf("Saisissez le message à poster : \n");
 			CLEAR_STDIN;
-			fgets(args, 21, stdin);
+			getline(&args, &arg_size , stdin);
+			args[strlen(args)-1] = '\0';
 			strcpy(msg->cmd_id, "4");
-			strcpy(msg->login, pseudo);
+			strcpy(msg->login, psd);
 			strcpy(msg->arg, args);
 			break;
 		case 'h':
@@ -131,7 +135,7 @@ void client_appli(char *serveur, char *service)
 			break;
 		case 'e':
 			strcpy(msg->cmd_id, "6");
-			strcpy(msg->login, pseudo);
+			strcpy(msg->login, psd);
 			break;
 		default:
 			cmd = 'h';
@@ -169,6 +173,7 @@ void client_appli(char *serveur, char *service)
 				}
 				break;
 			case 'p':
+				printf("%s\n",msg->cmd_id);
 				if (strcmp(msg->cmd_id, "1") == 0)
 				{
 					printf("Le message a été publié\n");

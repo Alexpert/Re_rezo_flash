@@ -7,6 +7,7 @@
 Flash_Instance *create_flash_instance() {
 	Flash_Instance *f_i = malloc(sizeof(Flash_Instance));
 	f_i->users = init_array_list();
+	f_i->posts = init_array_list();
 	f_i->next_usr_id = 0;
 	return f_i;
 }
@@ -108,17 +109,18 @@ Post *publish(char *login, char *message, Flash_Instance * f)
 {
 	User *publisher = getUser_from_login(login, f);
 
-	if (strlen(message) > 20 || !publisher)
-		return 0;
+	if (strlen(message) > 20 || !publisher) {
+		printf("publish fail\n");
+		return NULL;
+	}
 
 	Post *post = malloc(sizeof(Post));
 	add_element(f->posts, post);
 
 	post->readers = init_array_list();
-	ensure_capacity(post->readers, publisher->followers->current_index);
-	memcpy(post->readers->data, publisher->followers->data,
-	       publisher->followers->current_index);
-	post->readers->current_index = publisher->followers->current_index;
+	for (int i = 0; i < publisher->followers->current_index; ++i) {
+		add_element(post->readers, get(publisher->followers, i));
+	}
 	strcpy(post->content, message);
 	post->author_id = publisher->id;
 
