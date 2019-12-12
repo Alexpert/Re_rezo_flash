@@ -67,11 +67,59 @@ void remove_client(struct server_instance *instance, int socket)
 	}
 }
 
+void send_post_to(Post *p, User *dest, Flash_Instance *f) {
+
+	if (dest->socket > 0) {
+		Message msg;
+		sprintf(msg.login, "%*s", 2, "4");
+		sprintf(msg.login, "%*s", 6, getUser_from_id(p->author_id, f)->login);
+		sprintf(msg.arg, "%*s", 20, p->content);
+		h_writes(dest->socket, (char *) (&msg), sizeof(Message));
+		remove_element(p->readers, (void *) dest->id);
+		if (p->readers->current_index == 0)
+			remove_element(f->posts, p);
+			//destruct_post(p);
+	}
+}
+
+void send_post(Post *p, Flash_Instance *f) {
+	for (int i = 0; i < p->readers->current_index; ++i) {
+		send_post_to(p, (User *)get(p->readers, i), f);
+	}
+}
+
+void update_msg(int socket, char *login, Flash_Instance *f) {
+	User *user =getUser_from_login(login, f);
+	for (int i = 0; i < f->posts->current_index; ++i) {
+		Post *p = get(f->posts, i);
+		int j = 0;
+		for (; j < p->readers->current_index && get(p->readers, j) != user; ++j);
+		if (j != p->readers->current_index)
+			send_post_to(p, user, f);
+	}
+}
+
+void send_user_to(User *u, int socket) {
+	Message msg;
+	sprintf(msg.login, "%*s", 2, "6");
+	sprintf(msg.arg, "%*s", 20, u->login);
+	h_writes(socket, (char *) (&msg), sizeof(Message));
+}
+
+void send_list(array_list_t *list, int socket) {
+	Message msg;
+	sprintf(msg.login, "%*s", 2, "5");
+	sprintf(msg.arg, "%*d", 20, list->current_index);
+	h_writes(socket, (char *) (&msg), sizeof(Message));
+
+	for (int i = 0; i < list->current_index; ++i)
+		send_user_to((User *) get(list, i), socket);
+}
+
 void
-respond_client(int socket, char *str_recv,
-	       int ret, Flash_Instance *f)
+respond_client(int socket, char *str_recv, struct server_instance *s)
 {
-	//"%d;%d;%s"cmd_id,usr_id;cmd_arg,
+
 	/*
 	Actions:
 	1 Login/SignIn -> fail/win
@@ -82,32 +130,59 @@ respond_client(int socket, char *str_recv,
 	6 logout -> fail/win
 	*/
 
+	Flash_Instance *f = s->flash;
+
 	Message *msg = malloc(sizeof(Message));
+	Message *res = malloc(sizeof(Message));
+	Post *p;
 	memcpy((void *) msg, (void *) str_recv, sizeof(Message));
 
 	switch (msg->cmd_id[0]) {
 		case '1':
-			login(msg->login, socket, f); //Send Confirm
-			//update_msg();
+			if(login(msg->login, socket, f) == 0) {
+				strcpy(res->cmd_id, "1");
+			} else {
+				strcpy(res->cmd_id, "2");
+			}
+			update_msg(socket, msg->login, f);
 			break;
 		case '2':
-			subscribe(msg->login, msg->arg, f); //Send Confirm
+			if(subscribe(msg->login, msg->arg, f) == 0) {
+				strcpy(res->cmd_id, "1");
+			} else {
+				strcpy(res->cmd_id, "2");
+			}
 			break;
 		case '3':
-			unsubscribe(msg->login, msg->arg, f); //Send Confirm
+			if(unsubscribe(msg->login, msg->arg, f) == 0) {
+				strcpy(res->cmd_id, "1");
+			} else {
+				strcpy(res->cmd_id, "2");
+			}
 			break;
 		case '4':
-			publish(msg->login, msg->arg, f); //Send Confirm
-			//share_msg();
+			if(p = publish(msg->login, msg->arg, f)) {
+				strcpy(res->cmd_id, "1");
+			} else {
+				strcpy(res->cmd_id, "2");
+			}
+			send_post(p, f);
 			break;
 		case '5':
-			list_sub(msg->login, f); //None
-			//Send List
+			send_list(list_sub(msg->login, f), socket);
 			break;
 		case '6':
-			logout(msg->login, f); //Send Confirm
+			if(logout(msg->login, f) == 0) {
+				strcpy(res->cmd_id, "1");
+			} else {
+				strcpy(res->cmd_id, "2");
+			}
 			break;
 	}
+
+	char *str_res = malloc(sizeof(Message));
+	memcpy((void *) str_res, (void *) res, sizeof(Message));
+	h_writes(socket, str_res, sizeof(Message));
 }
 
 void serveur_appli(char *service)
@@ -142,7 +217,6 @@ void serveur_appli(char *service)
 		if (FD_ISSET(instance->socket, &rdfs)) {
 			printf("listening server\n");
 			int new_sock = add_client(instance);
-			h_writes(new_sock, "ping", 5);
 		} else {
 			printf("listening clients\n");
 			for (int i = 0; i < instance->clients->current_index; ++i) {
@@ -150,7 +224,7 @@ void serveur_appli(char *service)
 				if (FD_ISSET(curr_socket, &rdfs)) {
 					int ret = h_reads(curr_socket, str_recv, SIZE_RECV);
 					if (ret > 0) {
-						respond_client(curr_socket, str_recv, ret, instance->flash);
+						respond_client(curr_socket, str_recv, instance);
 					} else {
 						remove_client(instance, curr_socket);
 					}

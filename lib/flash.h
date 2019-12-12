@@ -8,7 +8,6 @@ typedef struct {
 	int socket;		//-1 if notconnected
 	array_list_t *following;
 	array_list_t *followers;
-	array_list_t *posts;
 } User;
 
 typedef struct {
@@ -19,6 +18,7 @@ typedef struct {
 
 typedef struct {
 	array_list_t *users;
+	array_list_t *posts;
 	int next_usr_id;
 } Flash_Instance;
 
@@ -53,7 +53,7 @@ int unsubscribe(char *follower, char *following, Flash_Instance * f);
 Publie un message
 -1 en cas d'erreur 0 sinon
 */
-int publish(char *author, char *message, Flash_Instance * f);
+Post *publish(char *author, char *message, Flash_Instance * f);
 
 /*
 Liste les abonnements

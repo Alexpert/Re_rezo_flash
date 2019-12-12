@@ -48,7 +48,6 @@ int login(char *login, int socket, Flash_Instance * f)
 		strcpy(newUser->login, login);
 		newUser->id = ++(f->next_usr_id);
 		newUser->socket = socket;
-		newUser->posts = init_array_list();
 		newUser->following = init_array_list();
 		newUser->followers = init_array_list();
 
@@ -96,15 +95,15 @@ int unsubscribe(char *follower, char *following, Flash_Instance * f)
 	return 0;
 }
 
-int publish(char *login, char *message, Flash_Instance * f)
+Post *publish(char *login, char *message, Flash_Instance * f)
 {
 	User *publisher = getUser_from_login(login, f);
 
 	if (strlen(message) > 20 || !publisher)
-		return -1;
+		return 0;
 
 	Post *post = malloc(sizeof(Post));
-	add_element(publisher->posts, (void *)post);
+	add_element(f->posts, post);
 
 	post->readers = init_array_list();
 	ensure_capacity(post->readers, publisher->followers->current_index);
@@ -114,7 +113,7 @@ int publish(char *login, char *message, Flash_Instance * f)
 	strcpy(post->content, message);
 	post->author_id = publisher->id;
 
-	return 0;
+	return post;
 }
 
 array_list_t *list_sub(char *login, Flash_Instance * f)
