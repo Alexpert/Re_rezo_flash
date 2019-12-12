@@ -19,7 +19,10 @@ typedef struct {
 
 typedef struct {
 	array_list_t *users;
+	int next_usr_id;
 } Flash_Instance;
+
+Flash_Instance *create_flash_instance();
 
 /*
 Retourne l'utilisateur ayant l'id id, NULL sinon
@@ -32,31 +35,31 @@ Login crée l'utilisateur de nom login si celui ci n'existe pas
 Si il existe, "connecte" l'utilisateur et affiche les messages en retard
 -1 en cas d'erreur 0 sinon
 */
-int login(int id, char *login, int socket, Flash_Instance * f);
+int login(char *login, int socket, Flash_Instance * f);
 
 /*
 Abonne sub à l'utilisateur canal
 -1 en cas d'erreur 0 sinon
 */
-int subscribe(int follower, char *following, Flash_Instance * f);
+int subscribe(char *follower, char *following, Flash_Instance * f);
 
 /*
 Desbonne sub de l'utilisateur canal
 -1 en cas d'erreur 0 sinon
 */
-int unsubscribe(int follower, char *following, Flash_Instance * f);
+int unsubscribe(char *follower, char *following, Flash_Instance * f);
 
 /*
 Publie un message
 -1 en cas d'erreur 0 sinon
 */
-int publish(int id, char *message, Flash_Instance * f);
+int publish(char *author, char *message, Flash_Instance * f);
 
 /*
 Liste les abonnements
 -1 en cas d'erreur 0 sinon
 */
-array_list_t *list_sub(int id, Flash_Instance * f);
+array_list_t *list_sub(char *user, Flash_Instance * f);
 
 /*
 "Déconnecte" l'utilisateur

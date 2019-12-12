@@ -15,6 +15,8 @@
 #define SERVEUR_DEFAUT "127.0.0.1"
 #define SIZE_RECV 32
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+
 struct server_instance {
 	struct sockaddr_in *p_adr_serv;
 	int socket;
@@ -32,8 +34,7 @@ struct server_instance *create_instance(int socket,
 	instance->socket = socket;
 	instance->clients = init_array_list();
 	instance->max_socket = socket;
-	instance->flash = malloc(sizeof(Flash_Instance));
-	instance->flash->users = init_array_list();
+	instance->flash = create_flash_instance();
 	return instance;
 }
 
@@ -41,8 +42,7 @@ int add_client(struct server_instance *instance)
 {
 	int new_sock = h_accept(instance->socket, instance->p_adr_serv);
 	add_element(instance->clients, (void *)new_sock);
-	instance->max_socket =
-	    new_sock > instance->max_socket ? new_sock : instance->max_socket;
+	instance->max_socket = MAX(instance->max_socket, new_sock);
 	printf("new socket %d count %d\n", new_sock,
 	       instance->clients->current_index);
 	return new_sock;
@@ -57,7 +57,7 @@ void remove_client(struct server_instance *instance, int socket)
 	if (instance->max_socket == socket) {
 		int max = 0;
 		for (int i = 0; i < instance->clients->current_index; ++i)
-			max = max > (int) get(instance->clients,i) ? max : (int)get(instance->clients, i);
+			max = MAX(max, (int) get(instance->clients, i));
 	}
 }
 
@@ -65,52 +65,47 @@ void
 respond_client(int socket, char *str_recv,
 	       int ret, Flash_Instance *f)
 {
-	//"%d: %d", code cmd, id user,
+	//"%d;%d;%s"cmd_id,usr_id;cmd_arg,
 	/*
 	Actions:
-	1 Login/SignIn
-	2 subscribe
-	3 unsubscribe
-	4 publish
-	5 list
-	6 logout
+	1 Login/SignIn -> new usr_id
+	2 subscribe -> fail/win
+	3 unsubscribe -> fail/win
+	4 publish -> fail/win
+	5 list -> list
+	6 logout -> fail/win
 	*/
-	// printf("%s\n", str_recv);
-	// char *buff = malloc(sizeof(char) * 5);
-	// sprintf(buff, "%d", socket);
-	// h_writes(get(instance->clients, socket), buff, 5);
 
 	int cmd_id;
-	int usr_id;
+	char *usr = malloc(sizeof(char) * 6);
 	char *cmd_arg = malloc(sizeof(char) * 20);
 
-	sscanf(str_recv, "%d;%d;", &cmd_id, &usr_id);
+	sscanf(str_recv, "%d;%s;", &cmd_id, usr);
 	strcpy(cmd_arg, &str_recv[12]);
 
 	switch (cmd_id) {
 		case 1:
-			login(usr_id, cmd_arg, socket, f);
+			login(usr, socket, f);
 			break;
 		case 2:
-			subscribe(usr_id, cmd_arg, f);
+			subscribe(usr, cmd_arg, f);
 			break;
 		case 3:
-			unsubscribe(usr_id, cmd_arg, f);
+			unsubscribe(usr, cmd_arg, f);
 			break;
 		case 4:
-			publish(usr_id, cmd_arg, f);
+			publish(usr, cmd_arg, f);
 			break;
 		case 5:
-			list_sub(usr_id, f);
+			list_sub(usr, f);
 			break;
 		case 6:
-			logout(usr_id, f);
+			logout(usr, f);
 			break;
 	}
 }
 
 void serveur_appli(char *service)
-/* procedure correspondant au traitement du client de votre application */
 {
 	printf("%s\n", service);
 

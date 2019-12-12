@@ -4,6 +4,13 @@
 
 #include "flash.h"
 
+Flash_Instance *create_flash_instance() {
+	Flash_Instance *f_i = malloc(sizeof(Flash_Instance));
+	f_i->users = init_array_list();
+	f_i->next_usr_id = 0;
+	return f_i;
+}
+
 User *getUser_from_id(int id, Flash_Instance * f)
 {
 	int i = 0;
@@ -28,21 +35,18 @@ User *getUser_from_login(char *login, Flash_Instance * f)
 	return (User *) get(f->users, i);
 }
 
-int login(int id, char *login, int socket, Flash_Instance * f)
+int login(char *login, int socket, Flash_Instance * f)
 {
-	int i = 0;
-	while (i < f->users->current_index
-	       && ((User *) get(f->users, i))->id != id)
-		++i;
+	User *user = getUser_from_login(login, f);
 
-	if (i == f->users->current_index) {	//ajout nouvel utilisateur
+	if (user == NULL) {	//ajout nouvel utilisateur
 		if (login == NULL || strlen(login) != 6)
 			return -1;
 
 		User *newUser = malloc(sizeof(User));
 
 		strcpy(newUser->login, login);
-		newUser->id = id;
+		newUser->id = ++(f->next_usr_id);
 		newUser->socket = socket;
 		newUser->posts = init_array_list();
 		newUser->following = init_array_list();
@@ -50,15 +54,15 @@ int login(int id, char *login, int socket, Flash_Instance * f)
 
 		add_element(f->users, newUser);
 	} else {		//connecter utilisateur
-		((User *) get(f->users, i))->socket = socket;
+		user->socket = socket;
 	}
 
 	return 0;
 }
 
-int subscribe(int follower, char *following, Flash_Instance * f)
+int subscribe(char *follower, char *following, Flash_Instance * f)
 {
-	User *follower_struct = (User *) getUser_from_id(follower, f);
+	User *follower_struct = (User *) getUser_from_login(follower, f);
 	User *following_struct = (User *) getUser_from_login(following, f);
 
 	if (follower_struct == NULL || following_struct == NULL)
@@ -70,9 +74,9 @@ int subscribe(int follower, char *following, Flash_Instance * f)
 	return 0;
 }
 
-int unsubscribe(int follower, char *following, Flash_Instance * f)
+int unsubscribe(char *follower, char *following, Flash_Instance * f)
 {
-	User *follower_struct = (User *) getUser_from_id(follower, f);
+	User *follower_struct = (User *) getUser_from_login(follower, f);
 	User *following_struct = (User *) getUser_from_login(following, f);
 
 	if (follower_struct == NULL || following_struct == NULL)
@@ -92,9 +96,9 @@ int unsubscribe(int follower, char *following, Flash_Instance * f)
 	return 0;
 }
 
-int publish(int id, char *message, Flash_Instance * f)
+int publish(char *login, char *message, Flash_Instance * f)
 {
-	User *publisher = getUser_from_id(id, f);
+	User *publisher = getUser_from_login(login, f);
 
 	if (strlen(message) > 20 || !publisher)
 		return -1;
@@ -108,21 +112,21 @@ int publish(int id, char *message, Flash_Instance * f)
 	       publisher->followers->current_index);
 	post->readers->current_index = publisher->followers->current_index;
 	strcpy(post->content, message);
-	post->author_id = id;
+	post->author_id = publisher->id;
 
 	return 0;
 }
 
-array_list_t *list_sub(int id, Flash_Instance * f)
+array_list_t *list_sub(char *login, Flash_Instance * f)
 {
-	User *user_struct = (User *) getUser_from_id(id, f);
+	User *user_struct = (User *) getUser_from_login(login, f);
 
 	return user_struct == NULL ? NULL : user_struct->following;
 }
 
-int logout(char *user, Flash_Instance * f)
+int logout(char *login, Flash_Instance * f)
 {
-	User *user_struct = (User *) getUser_from_login(user, f);
+	User *user_struct = (User *) getUser_from_login(login, f);
 	if (user_struct == NULL)
 		return -1;
 	user_struct->socket = -1;
