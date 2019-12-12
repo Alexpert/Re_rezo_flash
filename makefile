@@ -46,7 +46,7 @@ $(OBJ_DIR)/flash.o: $(LIB_DIR)/flash.h $(LIB_DIR)/flash.c
 
 #Make tests
 $(BIN_DIR)/client: $(OBJ_DIR)/client.o $(LIB_DIR)/libfon.a
-	$(CC) -o $(BIN_DIR)/client $(OBJ_DIR)/client.o -L. $(LIB_DIR)/libfon.a -lm
+	$(CC) -o $(BIN_DIR)/client $(OBJ_DIR)/client.o -L. $(LIB_DIR)/libfon.a -L. $(LIB_DIR)/libarray_list.a -lm
 
 $(BIN_DIR)/server: $(OBJ_DIR)/server.o $(LIB_DIR)/libfon.a
 	$(CC) -o $(BIN_DIR)/server $(OBJ_DIR)/server.o -L. $(LIB_DIR)/libflash.a -L. $(LIB_DIR)/libfon.a -L. $(LIB_DIR)/libarray_list.a -lm
