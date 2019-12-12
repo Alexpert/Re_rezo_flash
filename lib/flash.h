@@ -31,8 +31,8 @@ User *getUser_from_id(int id, Flash_Instance * f);
 User *getUser_from_login(char *login, Flash_Instance * f);
 
 /*
-Login crée l'utilisateur de nom login si celui ci n'existe pas
-Si il existe, "connecte" l'utilisateur et affiche les messages en retard
+Login crée l'utilisateur de nom login si celui ci n'existe pas et le connecte
+Si il existe, "connecte" l'utilisateur
 -1 en cas d'erreur 0 sinon
 */
 int login(char *login, int socket, Flash_Instance * f);

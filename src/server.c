@@ -68,7 +68,7 @@ respond_client(int socket, char *str_recv,
 	//"%d;%d;%s"cmd_id,usr_id;cmd_arg,
 	/*
 	Actions:
-	1 Login/SignIn -> new usr_id
+	1 Login/SignIn -> fail/win
 	2 subscribe -> fail/win
 	3 unsubscribe -> fail/win
 	4 publish -> fail/win
@@ -85,22 +85,25 @@ respond_client(int socket, char *str_recv,
 
 	switch (cmd_id) {
 		case 1:
-			login(usr, socket, f);
+			login(usr, socket, f); //Send Confirm
+			//update_msg();
 			break;
 		case 2:
-			subscribe(usr, cmd_arg, f);
+			subscribe(usr, cmd_arg, f); //Send Confirm
 			break;
 		case 3:
-			unsubscribe(usr, cmd_arg, f);
+			unsubscribe(usr, cmd_arg, f); //Send Confirm
 			break;
 		case 4:
-			publish(usr, cmd_arg, f);
+			publish(usr, cmd_arg, f); //Send Confirm
+			//share_msg();
 			break;
 		case 5:
-			list_sub(usr, f);
+			list_sub(usr, f); //None
+			//Send List
 			break;
 		case 6:
-			logout(usr, f);
+			logout(usr, f); //Send Confirm
 			break;
 	}
 }
