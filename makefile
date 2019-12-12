@@ -7,7 +7,7 @@ BIN_DIR=bin
 OBJ_DIR=obj
 
 libs: $(LIB_DIR)/libarray_list.a $(LIB_DIR)/libfon.a $(LIB_DIR)/libflash.a
-exec:	$(BIN_DIR)/client $(BIN_DIR)/server
+exec:	$(BIN_DIR)/client $(BIN_DIR)/server $(BIN_DIR)/dummy_client
 all: libs exec
 
 # Make Libraries
@@ -28,6 +28,10 @@ $(OBJ_DIR)/client.o: $(SRC_DIR)/client.c
 	$(CC) -c $(SRC_DIR)/client.c
 	mv client.o $(OBJ_DIR)/client.o
 
+$(OBJ_DIR)/dummy_client.o: $(SRC_DIR)/dummy_client.c
+	$(CC) -c $(SRC_DIR)/dummy_client.c
+	mv dummy_client.o $(OBJ_DIR)/dummy_client.o
+
 $(OBJ_DIR)/server.o: $(SRC_DIR)/server.c
 	$(CC) -c $(SRC_DIR)/server.c
 	mv server.o $(OBJ_DIR)/server.o
@@ -47,6 +51,9 @@ $(OBJ_DIR)/flash.o: $(LIB_DIR)/flash.h $(LIB_DIR)/flash.c
 #Make tests
 $(BIN_DIR)/client: $(OBJ_DIR)/client.o $(LIB_DIR)/libfon.a
 	$(CC) -o $(BIN_DIR)/client $(OBJ_DIR)/client.o -L. $(LIB_DIR)/libfon.a -lm
+
+$(BIN_DIR)/dummy_client: $(OBJ_DIR)/dummy_client.o $(LIB_DIR)/libfon.a
+	$(CC) -o $(BIN_DIR)/dummy_client $(OBJ_DIR)/dummy_client.o -L. $(LIB_DIR)/libfon.a -lm
 
 $(BIN_DIR)/server: $(OBJ_DIR)/server.o $(LIB_DIR)/libfon.a
 	$(CC) -o $(BIN_DIR)/server $(OBJ_DIR)/server.o -L. $(LIB_DIR)/libflash.a -L. $(LIB_DIR)/libfon.a -L. $(LIB_DIR)/libarray_list.a -lm
