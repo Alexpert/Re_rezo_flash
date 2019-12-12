@@ -13,9 +13,15 @@
 
 #define SERVICE_DEFAUT "1111"
 #define SERVEUR_DEFAUT "127.0.0.1"
-#define SIZE_RECV 32
+#define SIZE_RECV 30
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
+
+typedef struct {
+	char cmd_id[2];
+	char login[7];
+	char arg[21];
+} Message;
 
 struct server_instance {
 	struct sockaddr_in *p_adr_serv;
@@ -76,34 +82,30 @@ respond_client(int socket, char *str_recv,
 	6 logout -> fail/win
 	*/
 
-	int cmd_id;
-	char *usr = malloc(sizeof(char) * 6);
-	char *cmd_arg = malloc(sizeof(char) * 20);
+	Message *msg = malloc(sizeof(Message));
+	memcpy((void *) msg, (void *) str_recv, sizeof(Message));
 
-	sscanf(str_recv, "%d;%s;", &cmd_id, usr);
-	strcpy(cmd_arg, &str_recv[12]);
-
-	switch (cmd_id) {
-		case 1:
-			login(usr, socket, f); //Send Confirm
+	switch (msg->cmd_id[0]) {
+		case '1':
+			login(msg->login, socket, f); //Send Confirm
 			//update_msg();
 			break;
-		case 2:
-			subscribe(usr, cmd_arg, f); //Send Confirm
+		case '2':
+			subscribe(msg->login, msg->arg, f); //Send Confirm
 			break;
-		case 3:
-			unsubscribe(usr, cmd_arg, f); //Send Confirm
+		case '3':
+			unsubscribe(msg->login, msg->arg, f); //Send Confirm
 			break;
-		case 4:
-			publish(usr, cmd_arg, f); //Send Confirm
+		case '4':
+			publish(msg->login, msg->arg, f); //Send Confirm
 			//share_msg();
 			break;
-		case 5:
-			list_sub(usr, f); //None
+		case '5':
+			list_sub(msg->login, f); //None
 			//Send List
 			break;
-		case 6:
-			logout(usr, f); //Send Confirm
+		case '6':
+			logout(msg->login, f); //Send Confirm
 			break;
 	}
 }
