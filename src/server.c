@@ -135,8 +135,7 @@ void serveur_appli(char *service)
 		for (int i = 0; i < instance->clients->current_index; ++i)
 			FD_SET((int)get(instance->clients, i), &rdfs);
 
-		if ((select(instance->max_socket + 1, &rdfs, NULL, NULL, NULL))
-		    < 0) {
+		if ((select(instance->max_socket + 1, &rdfs, NULL, NULL, NULL)) < 0) {
 			perror("select()");
 			exit(errno);
 		}

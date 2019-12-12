@@ -9,6 +9,13 @@
 
 #define SERVICE_DEFAUT "1111"
 #define SERVEUR_DEFAUT "127.0.0.1"
+#define SIZE_RECV 30
+
+typedef struct {
+	char cmd_id[2];
+	char login[7];
+	char arg[21];
+} Message;
 
 void client_appli(char *serveur, char *service)
 /* procedure correspondant au traitement du client de votre application */
@@ -20,9 +27,14 @@ void client_appli(char *serveur, char *service)
 	adr_socket(SERVICE_DEFAUT, NULL, SOCK_STREAM, &p_adr_client);
 
 	h_connect(numsockclient, p_adr_client);
-	char *str_recv = malloc(sizeof(char) * 5);
+	char *str_recv = malloc(sizeof(char) * SIZE_RECV);
+	printf("Bonjour et bienvenue sur FlashTweet !\n");
+	printf("Veuillez saisir votre nom d'utilisateur : ");
+	
 
 	do {
+
+
 		h_reads(numsockclient, str_recv, 5);	// On récupère la saisie du client
 		printf("%s\n", str_recv);
 		sleep(1);
