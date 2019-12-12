@@ -9,16 +9,18 @@
 
 #include "../lib/fon.h"		/* Primitives de la boite a outils */
 #include "../lib/array_list.h"
+#include "../lib/flash.h"
 
 #define SERVICE_DEFAUT "1111"
 #define SERVEUR_DEFAUT "127.0.0.1"
-#define SIZE_REV 255
+#define SIZE_RECV 32
 
 struct server_instance {
 	struct sockaddr_in *p_adr_serv;
 	int socket;
 	array_list_t *clients;
 	int max_socket;
+	Flash_Instance *flash;
 };
 
 struct server_instance *create_instance(int socket,
@@ -30,6 +32,8 @@ struct server_instance *create_instance(int socket,
 	instance->socket = socket;
 	instance->clients = init_array_list();
 	instance->max_socket = socket;
+	instance->flash = malloc(sizeof(Flash_Instance));
+	instance->flash->users = init_array_list();
 	return instance;
 }
 
@@ -58,14 +62,51 @@ void remove_client(struct server_instance *instance, int socket)
 }
 
 void
-respond_client(struct server_instance *instance, int socket, char *str_recv,
-	       int ret)
+respond_client(int socket, char *str_recv,
+	       int ret, Flash_Instance *f)
 {
 	//"%d: %d", code cmd, id user,
-	printf("%s\n", str_recv);
-	char *buff = malloc(sizeof(char) * 5);
-	sprintf(buff, "%d", socket);
-	h_writes(get(instance->clients, socket), buff, 5);
+	/*
+	Actions:
+	1 Login/SignIn
+	2 subscribe
+	3 unsubscribe
+	4 publish
+	5 list
+	6 logout
+	*/
+	// printf("%s\n", str_recv);
+	// char *buff = malloc(sizeof(char) * 5);
+	// sprintf(buff, "%d", socket);
+	// h_writes(get(instance->clients, socket), buff, 5);
+
+	int cmd_id;
+	int usr_id;
+	char *cmd_arg = malloc(sizeof(char) * 20);
+
+	sscanf(str_recv, "%d;%d;", &cmd_id, &usr_id);
+	strcpy(cmd_arg, &str_recv[12]);
+
+	switch (cmd_id) {
+		case 1:
+			login(usr_id, cmd_arg, socket, f);
+			break;
+		case 2:
+			subscribe(usr_id, cmd_arg, f);
+			break;
+		case 3:
+			unsubscribe(usr_id, cmd_arg, f);
+			break;
+		case 4:
+			publish(usr_id, cmd_arg, f);
+			break;
+		case 5:
+			list_sub(usr_id, f);
+			break;
+		case 6:
+			logout(usr_id, f);
+			break;
+	}
 }
 
 void serveur_appli(char *service)
@@ -80,7 +121,7 @@ void serveur_appli(char *service)
 	h_bind(sockServeur, p_adr_serv);
 	h_listen(sockServeur, 1);
 
-	char *str_recv = malloc(sizeof(char) * SIZE_REV);
+	char *str_recv = malloc(sizeof(char) * SIZE_RECV + 1);
 	fd_set rdfs;
 
 	struct server_instance *instance =
@@ -105,21 +146,14 @@ void serveur_appli(char *service)
 			h_writes(new_sock, "ping", 5);
 		} else {
 			printf("listening clients\n");
-			for (int i = 0; i < instance->clients->current_index;
-			     ++i) {
-				if (FD_ISSET
-				    ((int)get(instance->clients, i), &rdfs)) {
-					int ret =
-					    h_reads(get(instance->clients, i),
-						    str_recv, 5);
+			for (int i = 0; i < instance->clients->current_index; ++i) {
+				int curr_socket = (int) get(instance->clients, i);
+				if (FD_ISSET(curr_socket, &rdfs)) {
+					int ret = h_reads(curr_socket, str_recv, SIZE_RECV);
 					if (ret > 0) {
-						respond_client(instance, i,
-							       str_recv, ret);
+						respond_client(curr_socket, str_recv, ret, instance->flash);
 					} else {
-						remove_client(instance,
-							      (int)
-							      get(instance->
-								  clients, i));
+						remove_client(instance, curr_socket);
 					}
 				}
 			}

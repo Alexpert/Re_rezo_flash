@@ -38,13 +38,13 @@ int login(int id, char *login, int socket, Flash_Instance * f);
 Abonne sub à l'utilisateur canal
 -1 en cas d'erreur 0 sinon
 */
-int subscribe(char *following, char *follower, Flash_Instance * f);
+int subscribe(int follower, char *following, Flash_Instance * f);
 
 /*
 Desbonne sub de l'utilisateur canal
 -1 en cas d'erreur 0 sinon
 */
-int unsubscribe(char *following, char *follower, Flash_Instance * f);
+int unsubscribe(int follower, char *following, Flash_Instance * f);
 
 /*
 Publie un message

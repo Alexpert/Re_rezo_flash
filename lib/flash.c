@@ -56,9 +56,9 @@ int login(int id, char *login, int socket, Flash_Instance * f)
 	return 0;
 }
 
-int subscribe(char *following, char *follower, Flash_Instance * f)
+int subscribe(int follower, char *following, Flash_Instance * f)
 {
-	User *follower_struct = (User *) getUser_from_login(follower, f);
+	User *follower_struct = (User *) getUser_from_id(follower, f);
 	User *following_struct = (User *) getUser_from_login(following, f);
 
 	if (follower_struct == NULL || following_struct == NULL)
@@ -70,9 +70,9 @@ int subscribe(char *following, char *follower, Flash_Instance * f)
 	return 0;
 }
 
-int unsubscribe(char *following, char *follower, Flash_Instance * f)
+int unsubscribe(int follower, char *following, Flash_Instance * f)
 {
-	User *follower_struct = (User *) getUser_from_login(follower, f);
+	User *follower_struct = (User *) getUser_from_id(follower, f);
 	User *following_struct = (User *) getUser_from_login(following, f);
 
 	if (follower_struct == NULL || following_struct == NULL)
