@@ -26,9 +26,11 @@ User *getUser_from_id(int id, Flash_Instance * f)
 User *getUser_from_login(char *login, Flash_Instance * f)
 {
 	int i = 0;
-	while (i < f->users->current_index
-	       && strcmp(((User *) get(f->users, i))->login, login))
-		++i;
+	while (i < f->users->current_index && strcmp(((User *) get(f->users, i))->login, login) != 0) {
+			printf("user: %ld\n", strlen(((User *)get(f->users, i))->login));
+			printf("user: %ld\n", strlen(login));
+			++i;
+	}
 	if (i == f->users->current_index)
 		return NULL;
 
@@ -61,11 +63,18 @@ int login(char *login, int socket, Flash_Instance * f)
 
 int subscribe(char *follower, char *following, Flash_Instance * f)
 {
+	printf("%s subs %s", follower, following);
 	User *follower_struct = (User *) getUser_from_login(follower, f);
 	User *following_struct = (User *) getUser_from_login(following, f);
 
-	if (follower_struct == NULL || following_struct == NULL)
+	if (follower_struct == NULL) {
+		printf("%s not found", follower);
 		return -1;
+	}
+	if (following_struct == NULL) {
+		printf("%s not found", following);
+		return -1;
+	}
 
 	add_element(follower_struct->following, (void *)following_struct);
 	add_element(following_struct->followers, (void *)follower_struct);

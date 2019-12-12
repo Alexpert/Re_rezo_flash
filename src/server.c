@@ -137,14 +137,21 @@ respond_client(int socket, char *str_recv, struct server_instance *s)
 	Post *p;
 	memcpy((void *) msg, (void *) str_recv, sizeof(Message));
 
+	printf("cmd_id: %s\n", msg->cmd_id);
+	printf("login: %s\n", msg->login);
+	printf("arg: %s\n", msg->arg);
+
 	switch (msg->cmd_id[0]) {
 		case '1':
 			if(login(msg->login, socket, f) == 0) {
 				strcpy(res->cmd_id, "1");
+				printf("login 1\n");
 			} else {
 				strcpy(res->cmd_id, "2");
+				printf("login 2\n");
 			}
-			update_msg(socket, msg->login, f);
+			//update_msg(socket, msg->login, f);
+			printf("update done\n");
 			break;
 		case '2':
 			if(subscribe(msg->login, msg->arg, f) == 0) {
@@ -183,6 +190,7 @@ respond_client(int socket, char *str_recv, struct server_instance *s)
 	char *str_res = malloc(sizeof(Message));
 	memcpy((void *) str_res, (void *) res, sizeof(Message));
 	h_writes(socket, str_res, sizeof(Message));
+	printf("reply sent\n");
 }
 
 void serveur_appli(char *service)

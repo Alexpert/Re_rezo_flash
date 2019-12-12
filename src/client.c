@@ -11,6 +11,8 @@
 #define SERVEUR_DEFAUT "127.0.0.1"
 #define SIZE_RECV 30
 
+#define CLEAR_STDIN { int c; while((c = getchar()) != '\n' && c != EOF); }
+
 typedef struct
 {
 	char cmd_id[2];
@@ -39,20 +41,23 @@ void client_appli(char *serveur, char *service)
 /* procedure correspondant au traitement du client de votre application */
 {
 	printf("%s: %s\n", serveur, service);
+	size_t login_size = 7;
 
 	struct sockaddr_in *p_adr_client;
 	int numsockclient = h_socket(AF_INET, SOCK_STREAM);
 	adr_socket(SERVICE_DEFAUT, NULL, SOCK_STREAM, &p_adr_client);
 	char *str_recv = malloc(sizeof(char) * SIZE_RECV);
-	char pseudo[6];
+	char *pseudo;
 
 	//Connexion
 	h_connect(numsockclient, p_adr_client);
 
 	//Login
 	printf("Bonjour et bienvenue sur FlashTweet !\n");
-	printf("Veuillez saisir votre nom d'utilisateur : ");
-	scanf("%s", pseudo);
+	printf("Veuillez saisir votre nom d'utilisateur : \n");
+	//CLEAR_STDIN;
+	getline(&pseudo, &login_size, stdin);
+	// pseudo[6] = '\0';
 
 	Message *msg = malloc(sizeof(Message));
 	strcpy(msg->cmd_id, "1");
@@ -76,40 +81,46 @@ void client_appli(char *serveur, char *service)
 	int nb;
 	do
 	{
-		h_reads(numsockclient, str_recv, SIZE_RECV);
-		memcpy((void *)msg, (void *)str_recv, sizeof(Message));
-		if (strcmp(msg->cmd_id, "3") == 0)
-		{
-			nb = atoi(msg->arg);
-			for (int i = 0; i < nb; i++)
-			{
-				h_reads(numsockclient, str_recv, SIZE_RECV);
-				memcpy((void *)msg, (void *)str_recv, sizeof(Message));
-				display_msg(msg);
-			}
-		}
+		// h_reads(numsockclient, str_recv, SIZE_RECV);
+		// printf("msg recieved\n");
+		// memcpy((void *)msg, (void *)str_recv, sizeof(Message));
+		// if (strcmp(msg->cmd_id, "3") == 0)
+		// {
+		// 	nb = atoi(msg->arg);
+		// 	for (int i = 0; i < nb; i++)
+		// 	{
+		// 		h_reads(numsockclient, str_recv, SIZE_RECV);
+		// 		memcpy((void *)msg, (void *)str_recv, sizeof(Message));
+		// 		display_msg(msg);
+		// 	}
+		// }
 		printf("%s >", pseudo);
 		cmd = getc(stdin);
 		switch (cmd)
 		{
 		case 's':
-			printf("A qui souhaitez-vous vous abonner ? : ");
-			fgets(login, 7, stdin);
+			printf("A qui souhaitez-vous vous abonner ? : \n");
+			CLEAR_STDIN;
+			getline(&login, &login_size, stdin);
 			strcpy(msg->cmd_id, "2");
-			strcpy(msg->login, login);
+			strcpy(msg->login, pseudo);
+			strcpy(msg->arg, login);
 			break;
 		case 'u':
-			printf("De qui souhaitez-vous vous désabonner ? : ");
-			fgets(login, 7, stdin);
+			printf("De qui souhaitez-vous vous désabonner ? : \n");
+			CLEAR_STDIN;
+			getline(&login, &login_size, stdin);
 			strcpy(msg->cmd_id, "3");
-			strcpy(msg->login, login);
+			strcpy(msg->login, pseudo);
+			strcpy(msg->arg, login);
 			break;
 		case 'l':
 			strcpy(msg->cmd_id, "5");
 			strcpy(msg->login, pseudo);
 			break;
 		case 'p':
-			printf("Saisissez le message à poster : ");
+			printf("Saisissez le message à poster : \n");
+			CLEAR_STDIN;
 			fgets(args, 21, stdin);
 			strcpy(msg->cmd_id, "4");
 			strcpy(msg->login, pseudo);
